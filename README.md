@@ -1,6 +1,6 @@
 # youtube video player
 
-simple YouTube Video Player component that asks the user to input a video URL and then autoplays the video for them. it should includes a frontend implemented using React and TypeScript, and a backend implemented using Node.js REST API.
+simple YouTube Video Player component that asks the user to input a video URL and then autoplays the video for them. it includes a frontend implemented using React and TypeScript, and a backend implemented using Node.js REST API.
 also the component state is managed using Redux.
 
 ## Installation
