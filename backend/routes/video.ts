@@ -6,11 +6,9 @@ import express, { Application, Request, Response } from 'express';
 import { db } from '../store/index';
 
 videoRouter.post('/', (req: Request, res: Response) => {
-  const { videoUrl, playbackPosition } = req.body;
-  if (!videoUrl || !playbackPosition)
-    return res.status(400).send('Please provide complete information');
-
-  return res.send(db.saveVideo({ videoUrl, playbackPosition }));
+  const { videoUrl, startAt, endAt, replayAt } = req.body;
+  if (!videoUrl) return res.status(400).send('Please provide complete information');
+  return res.send(db.saveVideo({ videoUrl, startAt, endAt, replayAt }));
 });
 
 videoRouter.get('/', (req: Request, res: Response) => {
@@ -24,14 +22,5 @@ videoRouter.get('/:videoUrl', (req: Request, res: Response) => {
   }
   return res.status(200).send(db.getVideo(videoUrl));
 });
-videoRouter.patch('/:videoUrl', (req: Request, res: Response) => {
-  const videoDetails = db.getVideo(req.body.videoUrl);
-  if (!videoDetails) {
-    return res.status(400).send('Please enter a URL saved in the database');
-  }
-  console.log('req.body', req.body);
 
-  videoDetails.playbackPosition = req.body.playbackPosition;
-  return res.send({ videoDetails });
-});
 export default videoRouter;

@@ -1,4 +1,6 @@
 export interface Video {
   videoUrl: string;
-  playbackPosition: string;
+  startAt?: string;
+  endAt?: string;
+  replayAt?: string;
 }
