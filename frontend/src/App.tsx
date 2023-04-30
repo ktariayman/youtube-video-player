@@ -6,82 +6,55 @@ import { Route, Routes, useNavigate } from 'react-router-dom';
 import { saveVideo } from './store/videoReducer';
 import Video from './components/video';
 import { HomePage, GifPage } from './pages';
-import axios from './axios';
+import { AppDispatch, RootState } from './store';
+import { ThunkDispatch } from 'redux-thunk';
+import { AnyAction } from 'redux';
+import { useSelector } from 'react-redux';
 function App() {
-  const dispatch = useDispatch();
+  const dispatch: ThunkDispatch<RootState, unknown, AnyAction> = useDispatch();
+  const video = useSelector((state: RootState) => state.video);
+  const videoUrlFromStore = video?.videoUrl;
   const [videoUrl, setVideoUrl] = useState('');
   const [formSubmitted, setFormSubmitted] = useState(false);
-  const [replayAt, setReplayAt] = useState('');
-  const [videoDuration, setVideoDuration] = useState('');
   const [startAt, setStartAt] = useState('');
-  const [endAt, setEndAt] = useState('');
-  const [isReplayed, setIsReplayed] = useState(false);
+  const [playbackPosition, setPlaybackPosition] = useState('');
   const navigate = useNavigate();
   const onPlayerReady = async (event: any) => {
-    if (replayAt === '') {
-      await event.target.playVideo();
-      const date = new Date().getTime();
-      setStartAt(date.toString());
-      setVideoDuration(event.target.getDuration());
-      setEndAt(String(date + Math.floor(Number(event.target.getDuration()) + 1)));
-      await saveVideoApi();
-    } else if (!isReplayed) {
-      setIsReplayed(true);
-      await event.target.seekTo((+replayAt - +startAt) / 1000);
-    }
+    await event.target.playVideo();
+
+    await dispatchSaveVideo();
   };
-  const saveVideoApi = async () => {
-    const url = 'http://localhost:5000/videos';
-    await axios
-      .post(url, {
-        videoUrl: videoUrl,
-        startAt: startAt,
-        endAt: endAt,
-        replayAt: replayAt
-      })
-      .then((response) => console.log('response', response));
-  };
-  const onSaveVideo = async (e: any) => {
-    dispatch(
+
+  const dispatchSaveVideo = async () => {
+    await dispatch(
       saveVideo({
         videoUrl: videoUrl,
-        startAt: startAt,
-        endAt: endAt,
-        replayAt: replayAt
+        playbackPosition: playbackPosition
       })
     );
+  };
+  const onSaveVideo = async (e: React.FormEvent) => {
+    if (formSubmitted && videoUrlFromStore !== videoUrl) {
+      setPlaybackPosition('');
+      setFormSubmitted(false);
+    }
+    e.preventDefault();
+    await dispatchSaveVideo();
     setFormSubmitted(true);
   };
 
   const navigateToGif = async (e: any) => {
-    await setReplayAt(new Date().getTime().toString());
-    setIsReplayed(false);
-    dispatch(
-      saveVideo({
-        videoUrl: videoUrl,
-        startAt: startAt,
-        endAt: endAt,
-        replayAt: replayAt
-      })
-    );
+    await dispatchSaveVideo();
     navigate('/home');
   };
+
   const onSubmit = (e: any) => {
     e.preventDefault();
     onSaveVideo(e);
   };
   useEffect(() => {
-    if (startAt && endAt && videoUrl) {
-      dispatch(
-        saveVideo({
-          videoUrl: videoUrl,
-          startAt: startAt,
-          endAt: endAt,
-          replayAt: replayAt
-        })
-      );
-    }
-  }, [videoDuration]);
+    dispatchSaveVideo();
+  }, [playbackPosition]);
 
   return (
     <div className='App'>
@@ -95,6 +68,8 @@ function App() {
               navigate={navigateToGif}
               onSubmit={onSubmit}
               onPlayerReady={onPlayerReady}
+              setStartAt={setStartAt}
+              playbackPosition={playbackPosition}
               formSubmitted={formSubmitted}
             />
           }
@@ -104,10 +79,9 @@ function App() {
           element={
             <GifPage
               videoUrl={videoUrl}
+              playbackPosition={playbackPosition}
               startAt={startAt}
-              endAt={endAt}
-              replayAt={replayAt}
-              setReplayAt={setReplayAt}
+              setPlaybackPosition={setPlaybackPosition}
             />
           }
         />

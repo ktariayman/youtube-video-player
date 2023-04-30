@@ -1,34 +1,41 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { RootState } from './index';
+import axios from 'axios';
 
 export interface VideoState {
   videoUrl: string;
-  startAt: string;
-  endAt: string;
-  replayAt?: string;
+  playbackPosition: string;
 }
+
 const initialState: VideoState = {
   videoUrl: '',
-  startAt: '',
-  endAt: ''
+  playbackPosition: ''
 };
 
-export const videoReducer = createSlice({
+export const saveVideo = createAsyncThunk(
+  'video/saveVideo',
+  async ({ videoUrl, playbackPosition }: VideoState) => {
+    const response = await axios.post('http://localhost:5000/videos', {
+      videoUrl,
+      playbackPosition
+    });
+    return response.data;
+  }
+);
+
+export const videoSlice = createSlice({
   name: 'video',
   initialState,
-  reducers: {
-    saveVideo: (state, action: PayloadAction<VideoState>) => {
-      state.videoUrl = action.payload.videoUrl;
-      state.startAt = action.payload.startAt;
-      state.endAt = action.payload.endAt;
-      state.replayAt = action.payload.replayAt;
-    }
+  reducers: {},
+  extraReducers: (builder) => {
+    builder.addCase(saveVideo.fulfilled, (state, action) => {
+      state.videoUrl = action.meta.arg.videoUrl;
+      state.playbackPosition = action.meta.arg.playbackPosition;
+    });
   }
 });
 
-export const { saveVideo } = videoReducer.actions;
+export const selectVideoUrl = (state: RootState) => state.video.videoUrl;
 
-export const videoUrl = (state: RootState) => state.video.videoUrl;
-
-export default videoReducer.reducer;
+export default videoSlice.reducer;
