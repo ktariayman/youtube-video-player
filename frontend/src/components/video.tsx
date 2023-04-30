@@ -4,19 +4,20 @@ import { RootState } from '../store';
 import { useDispatch } from 'react-redux';
 import { VideoState, saveVideo } from '../store/videoReducer';
 import YouTube, { YouTubeProps } from 'react-youtube';
-
-function Video({ formSubmitted, onPlayerReady }: any) {
+function Video({ onPlayerReady, playbackPosition, formSubmitted }: any) {
   const { videoUrl } = useSelector((state: RootState) => state.video);
 
   const opts: YouTubeProps['opts'] = {
     height: '390',
     width: '640',
     playerVars: {
-      // https://developers.google.com/youtube/player_parameters
-      autoplay: 1
+      autoplay: 1,
+      start: Math.floor(+playbackPosition / 1000),
+      controls: 0
     }
   };
-  const videoId = videoUrl.split('=')[1];
+  const videoId = videoUrl?.split('=')[1];
+
   return (
     <div
       style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '90vh' }}
