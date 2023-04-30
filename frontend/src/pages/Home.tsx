@@ -1,7 +1,16 @@
 import React from 'react';
 import Video from '../components/video';
 import './style.css';
-function Home({ videoUrl, setVideoUrl, formSubmitted, onPlayerReady, onSubmit, navigate }: any) {
+function Home({
+  videoUrl,
+  setVideoUrl,
+  onPlayerReady,
+  onSubmit,
+  navigate,
+  setStartAt,
+  playbackPosition,
+  formSubmitted
+}: any) {
   return (
     <>
       <header className='header'>
@@ -19,6 +28,7 @@ function Home({ videoUrl, setVideoUrl, formSubmitted, onPlayerReady, onSubmit, n
               onChange={(e: any) => {
                 e.preventDefault();
                 setVideoUrl(e.target.value);
+                setStartAt(new Date().getTime());
               }}
             />
 
@@ -37,12 +47,11 @@ function Home({ videoUrl, setVideoUrl, formSubmitted, onPlayerReady, onSubmit, n
           </form>
         </div>
       </header>
-      {formSubmitted && (
-        <Video
-          formSubmitted={formSubmitted}
-          onPlayerReady={onPlayerReady}
-        />
-      )}
+      <Video
+        onPlayerReady={onPlayerReady}
+        playbackPosition={playbackPosition}
+        formSubmitted={formSubmitted}
+      />
     </>
   );
 }

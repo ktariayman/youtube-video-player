@@ -3,11 +3,14 @@ import Video from '../components/video';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { saveVideo } from '../store/videoReducer';
+import { ThunkDispatch } from 'redux-thunk';
+import { RootState } from '../store';
+import { AnyAction } from 'redux';
 
-function Pagee({ videoUrl, startAt, endAt, replayAt, setReplayAt }: any) {
+function Pagee({ videoUrl, playbackPosition, startAt, setPlaybackPosition }: any) {
   const navigate = useNavigate();
-  const dispatch = useDispatch();
-
+  const dispatch: ThunkDispatch<RootState, unknown, AnyAction> = useDispatch();
+  const diffPerSec = new Date().getTime() - Number(startAt);
   return (
     <div className='gif-page'>
       <div>
@@ -18,13 +21,11 @@ function Pagee({ videoUrl, startAt, endAt, replayAt, setReplayAt }: any) {
           type='button'
           className='return-button'
           onClick={() => {
-            setReplayAt(new Date().getTime().toString());
+            setPlaybackPosition(diffPerSec);
             dispatch(
               saveVideo({
                 videoUrl: videoUrl,
-                startAt: startAt,
-                endAt: endAt,
-                replayAt: replayAt
+                playbackPosition: playbackPosition
               })
             );
             navigate('/');
